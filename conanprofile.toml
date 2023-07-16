@@ -1,4 +1,4 @@
 include(default)
 
-[setting]
+[settings]
 build_type=Release
