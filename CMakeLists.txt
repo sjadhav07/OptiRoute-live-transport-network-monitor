@@ -12,6 +12,9 @@ if(EXISTS ${CMAKE_CURRENT_BINARY_DIR}/conaninfo.txt)
     list(PREPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_BINARY_DIR}")
 endif()
 find_package(Boost 1.74 REQUIRED COMPONENTS system unit_test_framework)
+find_package(CURL REQUIRED)
+find_package(Filesystem REQUIRED)
+find_package(OpenSSL REQUIRED)
 
 # Called before any other target is defined.
 enable_testing()
@@ -25,12 +28,13 @@ endif()
 
 # Static library
 set(LIB_SOURCES
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/file-downloader.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/websocket-client.cpp"
 )
 add_library(network-monitor STATIC ${LIB_SOURCES})
 target_compile_features(network-monitor
     PUBLIC
-        cxx_std_14
+        cxx_std_17
 )
 target_compile_definitions(network-monitor
     PRIVATE
@@ -43,26 +47,34 @@ target_include_directories(network-monitor
 target_link_libraries(network-monitor
     PUBLIC
         Boost::Boost
+        OpenSSL::OpenSSL
+        std::filesystem
+    PRIVATE
+        CURL::CURL
 )
 
 # Tests
 set(TESTS_SOURCES
+    "${CMAKE_CURRENT_SOURCE_DIR}/tests/file-downloader.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/tests/main.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/tests/websocket-client.cpp"
 )
 add_executable(network-monitor-tests ${TESTS_SOURCES})
 target_compile_features(network-monitor-tests
     PRIVATE
-        cxx_std_14
+        cxx_std_17
 )
 target_compile_definitions(network-monitor-tests
     PRIVATE
+        TESTS_CACERT_PEM="${CMAKE_CURRENT_SOURCE_DIR}/tests/cacert.pem"
         $<$<PLATFORM_ID:Windows>:_WIN32_WINNT=${WINDOWS_VERSION}>
 )
 target_link_libraries(network-monitor-tests
     PRIVATE
         network-monitor
         Boost::Boost
+        OpenSSL::OpenSSL
+        std::filesystem
 )
 add_test(
     NAME network-monitor-tests
