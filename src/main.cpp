@@ -14,7 +14,7 @@ int main()
 {
     // Monitor configuration
     NetworkMonitorConfig config {
-        GetEnvVar("LTNM_SERVER_URL", "ltnm.learncppthroughprojects.com"),
+        GetEnvVar("LTNM_SERVER_URL", "url"),
         GetEnvVar("LTNM_SERVER_PORT", "443"),
         GetEnvVar("LTNM_USERNAME"),
         GetEnvVar("LTNM_PASSWORD"),
